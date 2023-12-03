@@ -18,6 +18,7 @@ namespace ChessTeamProject
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+ 
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -25,10 +26,10 @@ namespace ChessTeamProject
             InitializeComponent();
             var game = new Game();
             var whiteFactory = new WhiteSideFactory();
-            // Same for black
+            var blackFactory = new BlackSideFactory();
 
             var whiteBoard = game.CreateBoard(whiteFactory);
-            // Same for black
+            var blackBoard = game.CreateBoard(blackFactory);
         }
     }
 }

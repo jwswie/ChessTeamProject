@@ -13,7 +13,11 @@ namespace ChessTeamProject
             var board = new Board();
             board.P.Add(factory.CreatePawn());
             board.K.Add(factory.CreateKing());
-            // Same for other classes
+            board.Q.Add(factory.CreateQueen());
+            board.B.Add(factory.CreateBishop());
+            board.Kn.Add(factory.CreateKnight());
+            board.R.Add(factory.CreateRook());
+
             return board;
         }
     }

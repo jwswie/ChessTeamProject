@@ -10,13 +10,16 @@ namespace ChessTeamProject
     {
         public List<IPawn> P { get; } = new List<IPawn>();
         public List<IKing> K { get; } = new List<IKing>();
-        // Same for other interfaces
+        public List<IQueen> Q { get; } = new List<IQueen>();
+        public List<IBishop> B { get; } = new List<IBishop>();
+        public List<IKnight> Kn { get; } = new List<IKnight>();
+        public List<IRook> R { get; } = new List<IRook>();
 
-        public void Move()
+        /*public void Move()
         {
             foreach (var pawn in P) pawn.Move();
             foreach (var king in K) king.Move();
             // Same for other classes
-        }
+        }*/
     }
 }
