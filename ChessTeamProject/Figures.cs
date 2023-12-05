@@ -12,7 +12,7 @@ namespace ChessTeamProject
 
         public void Move()
         {
-            Console.WriteLine("Performing pawn's move...");
+            FigureMove.PerformPawnMove();
         }
     }
 
@@ -22,9 +22,107 @@ namespace ChessTeamProject
 
         public void Move()
         {
-            Console.WriteLine("Performing king's move...");
+            FigureMove.PerformKingMove();
         }
     }
 
-    // Same for other classes (WhiteQueen, WhiteBishop, WhiteKnight, WhiteRook, BlackPawn, BlackKing etc.)
+    public class WhiteQueen : IQueen
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformQueenMove();
+        }
+    }
+
+    public class WhiteBishop : IBishop
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformBishopMove();
+        }
+    }
+
+    public class WhiteKnight : IKnight
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformKnightMove();
+        }
+    }
+
+    public class WhiteRook : IRook
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformRookMove();
+        }
+    }
+
+    public class BlackPawn : IPawn
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformPawnMove();
+        }
+    }
+
+    public class BlackKing : IKing
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformKingMove();
+        }
+    }
+
+    public class BlackQueen : IQueen
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformQueenMove();
+        }
+    }
+
+    public class BlackBishop : IBishop
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformBishopMove();
+        }
+    }
+
+    public class BlackKnight : IKnight
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformKnightMove();
+        }
+    }
+
+    public class BlackRook : IRook
+    {
+        public string Side { get; set; } = "White";
+
+        public void Move()
+        {
+            FigureMove.PerformRookMove();
+        }
+    }
 }
