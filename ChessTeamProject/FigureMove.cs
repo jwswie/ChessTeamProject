@@ -11,7 +11,7 @@ namespace ChessTeamProject
     public class FigureMove
     {
 
-        public static void PerformPawnMove()
+        public static void PerformPawnMove(IPawn pawn, int newRow, int newCol)
         {
             Console.WriteLine("Performing pawn's move...");
         }
