@@ -14,12 +14,5 @@ namespace ChessTeamProject
         public List<IBishop> B { get; } = new List<IBishop>();
         public List<IKnight> Kn { get; } = new List<IKnight>();
         public List<IRook> R { get; } = new List<IRook>();
-
-        /*public void Move()
-        {
-            foreach (var pawn in P) pawn.Move();
-            foreach (var king in K) king.Move();
-            // Same for other classes
-        }*/
     }
 }

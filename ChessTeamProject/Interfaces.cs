@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace ChessTeamProject
 {
     public interface IPawn
     {
         string Side { get; set; }
+        Image Image { get; }
         void Move();
     }
 
@@ -27,6 +29,7 @@ namespace ChessTeamProject
     public interface IBishop
     {
         string Side { get; set; }
+        Image Image { get; }
         void Move();
     }
 

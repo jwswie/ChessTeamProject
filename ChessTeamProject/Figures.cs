@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace ChessTeamProject
 {
     public class WhitePawn : IPawn
     {
         public string Side { get; set; } = "White";
+
+        public Image Image => new Image { Source = new BitmapImage(new Uri("whitepan.png", UriKind.RelativeOrAbsolute)) };
 
         public void Move()
         {
@@ -40,6 +45,8 @@ namespace ChessTeamProject
     {
         public string Side { get; set; } = "White";
 
+        public Image Image => new Image { Source = new BitmapImage(new Uri("whitebishop.png", UriKind.RelativeOrAbsolute)) };
+
         public void Move()
         {
             FigureMove.PerformBishopMove();
@@ -68,7 +75,9 @@ namespace ChessTeamProject
 
     public class BlackPawn : IPawn
     {
-        public string Side { get; set; } = "White";
+        public string Side { get; set; } = "Black";
+
+        public Image Image => new Image { Source = new BitmapImage(new Uri("blackpan.png", UriKind.RelativeOrAbsolute)) };
 
         public void Move()
         {
@@ -98,7 +107,9 @@ namespace ChessTeamProject
 
     public class BlackBishop : IBishop
     {
-        public string Side { get; set; } = "White";
+        public string Side { get; set; } = "Black";
+
+        public Image Image => new Image { Source = new BitmapImage(new Uri("blackbishop.png", UriKind.RelativeOrAbsolute)) };
 
         public void Move()
         {
