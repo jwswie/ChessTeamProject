@@ -11,10 +11,21 @@ namespace ChessTeamProject
     public class FigureMove
     {
 
-        public static void PerformPawnMove(IPawn pawn, int newRow, int newCol)
+        public static void PerformPawnMove(Image pawn, int newRow, int newCol, int[,] chessBoard)
         {
-            Console.WriteLine("Performing pawn's move...");
+            if (pawn != null && newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8)
+            {
+                var grid = pawn.Parent as Grid;
+
+                if (grid != null && newRow < grid.RowDefinitions.Count && newCol < grid.ColumnDefinitions.Count)
+                {
+                    Grid.SetRow(pawn, newRow);
+                    Grid.SetColumn(pawn, newCol);
+                    chessBoard[newRow, newCol] = 1;
+                }
+            }
         }
+
 
         public static void PerformKingMove()
         {

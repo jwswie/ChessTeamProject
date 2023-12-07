@@ -11,7 +11,6 @@ namespace ChessTeamProject
     {
         string Side { get; set; }
         Image Image { get; }
-        void Move();
     }
 
     public interface IKing

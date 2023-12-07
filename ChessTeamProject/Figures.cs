@@ -13,12 +13,7 @@ namespace ChessTeamProject
     {
         public string Side { get; set; } = "White";
 
-        public Image Image => new Image { Source = new BitmapImage(new Uri("D:\\ChessTeamProject\\ChessTeamProject\\whitepan.png", UriKind.RelativeOrAbsolute)) };
-
-        public void Move()
-        {
-            FigureMove.PerformPawnMove();
-        }
+        public Image Image => new Image { Source = new BitmapImage(new Uri("whitepan.png", UriKind.RelativeOrAbsolute)) };
     }
 
     public class WhiteKing : IKing
@@ -45,7 +40,7 @@ namespace ChessTeamProject
     {
         public string Side { get; set; } = "White";
 
-        public Image Image => new Image { Source = new BitmapImage(new Uri("D:\\ChessTeamProject\\ChessTeamProject\\whitebishop.png", UriKind.RelativeOrAbsolute)) };
+        public Image Image => new Image { Source = new BitmapImage(new Uri("whitebishop.png", UriKind.RelativeOrAbsolute)) };
 
         public void Move()
         {
@@ -77,12 +72,7 @@ namespace ChessTeamProject
     {
         public string Side { get; set; } = "Black";
 
-        public Image Image => new Image { Source = new BitmapImage(new Uri("D:\\ChessTeamProject\\ChessTeamProject\\blackpan.png", UriKind.RelativeOrAbsolute)) };
-
-        public void Move()
-        {
-            FigureMove.PerformPawnMove();
-        }
+        public Image Image => new Image { Source = new BitmapImage(new Uri("blackpan.png", UriKind.RelativeOrAbsolute)) };
     }
 
     public class BlackKing : IKing
@@ -109,7 +99,7 @@ namespace ChessTeamProject
     {
         public string Side { get; set; } = "Black";
 
-        public Image Image => new Image { Source = new BitmapImage(new Uri("D:\\ChessTeamProject\\ChessTeamProject\\blackbishop.png", UriKind.RelativeOrAbsolute)) };
+        public Image Image => new Image { Source = new BitmapImage(new Uri("blackbishop.png", UriKind.RelativeOrAbsolute)) };
 
         public void Move()
         {
