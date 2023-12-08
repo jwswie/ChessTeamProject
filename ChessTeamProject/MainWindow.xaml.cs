@@ -19,7 +19,7 @@ namespace ChessTeamProject
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
- 
+
     public partial class MainWindow : Window
     {
         private IPawn selectedPawn;
@@ -79,7 +79,7 @@ namespace ChessTeamProject
                 var bishop = whiteBoard.B[i];
                 var image = bishop.Image;
                 int col;
-                if(i == 0)
+                if (i == 0)
                 {
                     col = 3;
                 }
@@ -90,6 +90,7 @@ namespace ChessTeamProject
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 7);
                 chessBoard[7, col] = 1;
+                image.MouseLeftButtonDown += BishopClicked;
                 MainGrid.Children.Add(image);
             }
 
@@ -109,6 +110,7 @@ namespace ChessTeamProject
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 0);
                 chessBoard[0, col] = 1;
+                image.MouseLeftButtonDown += BishopClicked;
                 MainGrid.Children.Add(image);
             }
         }
@@ -191,27 +193,27 @@ namespace ChessTeamProject
 
         private void PawnClicked(object sender, MouseButtonEventArgs e)
         {
-             clickedImage = (Image)sender;
+            clickedImage = (Image)sender;
 
-             var colIndex = Grid.GetColumn(clickedImage) - 1; // Finding pawns index in the List by its column
+            var colIndex = Grid.GetColumn(clickedImage) - 1; // Finding pawns index in the List by its column
 
-             var row = Grid.GetRow(clickedImage);
-             var col = Grid.GetColumn(clickedImage);
+            var row = Grid.GetRow(clickedImage);
+            var col = Grid.GetColumn(clickedImage);
 
-             int currentRow = int.Parse(row.ToString());
-             int currentCol = int.Parse(col.ToString());
+            int currentRow = int.Parse(row.ToString());
+            int currentCol = int.Parse(col.ToString());
 
-             if (clickedImage.Source.ToString().Contains("white"))
-             {
-                 if (colIndex >= 0 && colIndex < whiteBoard.P.Count) // Check that index is in the allowed range
-                 {
-                     selectedPawn = whiteBoard.P[colIndex]; // Find the pawn by col index
+            if (clickedImage.Source.ToString().Contains("white"))
+            {
+                if (colIndex >= 0 && colIndex < whiteBoard.P.Count) // Check that index is in the allowed range
+                {
+                    selectedPawn = whiteBoard.P[colIndex]; // Find the pawn by col index
 
-                     ResetCellHighlighting();
+                    ResetCellHighlighting();
 
-                     var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
+                    var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
 
-                     HighlightCells(possibleMoves);
+                    HighlightCells(possibleMoves);
 
                     foreach (var cell in possibleMoves) // Adding an event handler for each selected cell
                     {
@@ -229,18 +231,18 @@ namespace ChessTeamProject
                         MainGrid.Children.Add(panel);
                     }
                 }
-             }
-             else if (clickedImage.Source.ToString().Contains("black"))
-             {
-                 if (colIndex >= 0 && colIndex < blackBoard.P.Count)
-                 {
-                     selectedPawn = blackBoard.P[colIndex];
+            }
+            else if (clickedImage.Source.ToString().Contains("black"))
+            {
+                if (colIndex >= 0 && colIndex < blackBoard.P.Count)
+                {
+                    selectedPawn = blackBoard.P[colIndex];
 
-                     ResetCellHighlighting();
+                    ResetCellHighlighting();
 
-                     var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
+                    var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
 
-                     HighlightCells(possibleMoves);
+                    HighlightCells(possibleMoves);
 
                     foreach (var cell in possibleMoves)
                     {
@@ -258,7 +260,73 @@ namespace ChessTeamProject
                         MainGrid.Children.Add(panel);
                     }
                 }
-             }
+            }
+
+        }
+
+        private void BishopClicked(object sender, MouseButtonEventArgs e)
+        {
+            clickedImage = (Image)sender;
+
+            var row = Grid.GetRow(clickedImage);
+            var col = Grid.GetColumn(clickedImage);
+
+
+
+            int currentRow = int.Parse(row.ToString());
+            int currentCol = int.Parse(col.ToString());
+
+            if (clickedImage.Source.ToString().Contains("white"))
+            {
+
+                ResetCellHighlighting();
+
+                var possibleMoves = GetPossibleBishopMoves(currentRow, currentCol);
+
+                HighlightCells(possibleMoves);
+
+                foreach (var cell in possibleMoves) // Adding an event handler for each selected cell
+                {
+                    var panel = new WrapPanel
+                    {
+                        Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
+                        Opacity = 0.5
+                    };
+
+                    Grid.SetColumn(panel, (int)cell.X);
+                    Grid.SetRow(panel, (int)cell.Y);
+
+                    panel.MouseLeftButtonDown += CellClicked;
+
+                    MainGrid.Children.Add(panel);
+                }
+            }
+            else if (clickedImage.Source.ToString().Contains("black"))
+            {
+
+
+                ResetCellHighlighting();
+
+                var possibleMoves = GetPossibleBishopMoves(currentRow, currentCol);
+
+                HighlightCells(possibleMoves);
+
+                foreach (var cell in possibleMoves)
+                {
+                    var panel = new WrapPanel
+                    {
+                        Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
+                        Opacity = 0.5
+                    };
+
+                    Grid.SetColumn(panel, (int)cell.X);
+                    Grid.SetRow(panel, (int)cell.Y);
+
+                    panel.MouseLeftButtonDown += CellClicked;
+
+                    MainGrid.Children.Add(panel);
+                }
+            }
 
         }
 
@@ -268,7 +336,7 @@ namespace ChessTeamProject
 
             var possibleMoves = new List<Point>();
 
-            if (pawn is WhitePawn && currentRow > 1)
+            if (pawn.Side == "White" && currentRow > 1)
             {
                 var oneCellAhead = new Point(currentCol, currentRow - 1);
 
@@ -285,9 +353,9 @@ namespace ChessTeamProject
                         }
                     }
                 }
-                    
+
             }
-            else if (pawn is BlackPawn && currentRow < 8)
+            else if (pawn.Side == "Black" && currentRow < 8)
             {
                 var oneCellAhead = new Point(currentCol, currentRow + 1);
                 if (!IsCellOccupied(chessBoard, (int)oneCellAhead.X, (int)oneCellAhead.Y))
@@ -308,10 +376,105 @@ namespace ChessTeamProject
             return possibleMoves;
         }
 
+        private List<Point> GetPossibleBishopMoves(int currentRow, int currentCol)
+        {
+            var possibleMoves = new List<Point>();
+
+            if (clickedImage.Source.ToString().Contains("white") && currentRow >= 0)
+            {
+                CheckDiagonal(possibleMoves, currentRow, currentCol, chessBoard);
+
+            }
+            else if (clickedImage.Source.ToString().Contains("black") && currentRow >= 0)
+            {
+                CheckDiagonal(possibleMoves, currentRow, currentCol, chessBoard);
+            }
+
+            return possibleMoves;
+        }
+
+        private void CheckDiagonal(List<Point> possibleMoves, int currentRow, int currentCol, int[,] chessBoard)
+        {
+            for (int n = 1; n <= Math.Min(currentRow, currentCol - 1); n++) // LEFT UO
+            {
+                int newRow = currentRow - n;
+                int newCol = currentCol - n;
+
+                if (IsCellOccupied(chessBoard, newCol, newRow))
+                {
+                    break; // If the cell is occupied, stop moving diagonally
+                }
+
+                possibleMoves.Add(new Point(newCol, newRow));
+
+                // Check if the current cell is a corner cell and free, add it to possible moves
+                if (n == Math.Min(currentRow, currentCol - 1) && !IsCellOccupied(chessBoard, newCol, newRow))
+                {
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+            }
+
+
+            for (int n = 1; n <= Math.Min(currentRow, 8 - currentCol); n++) // RIGHT UP
+            {
+                int newRow = currentRow - n;
+                int newCol = currentCol + n;
+
+                if (IsCellOccupied(chessBoard, newCol, newRow))
+                {
+                    break;
+                }
+
+                possibleMoves.Add(new Point(newCol, newRow));
+
+                if (n == Math.Min(currentRow, 8 - currentCol) && !IsCellOccupied(chessBoard, newCol, newRow))
+                {
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+            }
+
+            for (int n = 1; n <= Math.Min(7 - currentRow, currentCol); n++) // LEFT DOWN
+            {
+                int newRow = currentRow + n;
+                int newCol = currentCol - n;
+
+                if (IsCellOccupied(chessBoard, newRow, newCol))
+                {
+                    break;
+                }
+
+                possibleMoves.Add(new Point(newCol, newRow));
+
+                if (n == Math.Min(8 - currentRow, currentCol) && !IsCellOccupied(chessBoard, newRow, newCol))
+                {
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+            }
+
+            for (int n = 1; n <= Math.Min(7 - currentRow, 8 - currentCol); n++) // RIGHT DOWN
+            {
+                int newRow = currentRow + n;
+                int newCol = currentCol + n;
+
+                if (IsCellOccupied(chessBoard, newRow, newCol))
+                {
+                    break;
+                }
+
+                possibleMoves.Add(new Point(newCol, newRow));
+
+                if (n == Math.Min(7 - currentRow, 8 - currentCol) && !IsCellOccupied(chessBoard, newRow, newCol))
+                {
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+            }
+        }
+
+
         private bool IsCellOccupied(int[,] chessBoard, int col, int row)
         {
 
-            if(chessBoard[row, col] == 1)
+            if (chessBoard[row, col] == 1)
             {
                 return true;
             }
@@ -320,9 +483,6 @@ namespace ChessTeamProject
                 return false;
             }
         }
-
-
-
 
         private void CellClicked(object sender, MouseButtonEventArgs e)
         {

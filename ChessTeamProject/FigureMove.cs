@@ -13,7 +13,7 @@ namespace ChessTeamProject
 
         public static void PerformPawnMove(Image pawn, int newRow, int newCol, int[,] chessBoard)
         {
-            if (pawn != null && newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8)
+            if (pawn != null && newRow >= 0 && newRow < 8 && newCol >= 0 && newCol <= 8)
             {
                 var grid = pawn.Parent as Grid;
 
@@ -37,9 +37,19 @@ namespace ChessTeamProject
             Console.WriteLine("Performing queen's move...");
         }
 
-        public static void PerformBishopMove()
+        public static void PerformBishopMove(Image bishop, int newRow, int newCol, int[,] chessBoard)
         {
-            Console.WriteLine("Performing bishop's move...");
+            if (bishop != null && newRow >= 0 && newRow < 8 && newCol >= 0 && newCol <= 8)
+            {
+                var grid = bishop.Parent as Grid;
+
+                if (grid != null && newRow < grid.RowDefinitions.Count && newCol < grid.ColumnDefinitions.Count)
+                {
+                    Grid.SetRow(bishop, newRow);
+                    Grid.SetColumn(bishop, newCol);
+                    chessBoard[newRow, newCol] = 1;
+                }
+            }
         }
 
         public static void PerformKnightMove()
