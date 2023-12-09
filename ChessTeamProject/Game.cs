@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChessTeamProject
+﻿namespace ChessTeamProject
 {
     public class Game
     {
@@ -18,7 +12,7 @@ namespace ChessTeamProject
             }
             board.K.Add(factory.CreateKing());
             board.Q.Add(factory.CreateQueen());
-            //board.B.Add(factory.CreateBishop());
+
             for (int i = 1; i <= 4; i++)
             {
                 board.B.Add(factory.CreateBishop());

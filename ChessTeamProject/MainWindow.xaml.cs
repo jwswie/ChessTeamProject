@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Media.Animation;
 
 namespace ChessTeamProject
 {
@@ -31,7 +32,9 @@ namespace ChessTeamProject
         private static Board whiteBoard;
         private static Board blackBoard;
 
-        private static int[,] chessBoard = new int[9, 9];
+        private static int[,] chessBoard = new int[9, 9]; // Array showing the position of figures on the board (0 - empty cell, 1 - figure)
+
+        private static string currentSide;
 
         public MainWindow()
         {
@@ -51,6 +54,8 @@ namespace ChessTeamProject
             whiteBoard = game.CreateBoard(whiteFactory);
             blackBoard = game.CreateBoard(blackFactory);
 
+            currentSide = "white";
+
             for (int i = 1; i <= 8; i++) // Adding white pawns
             {
                 var pawn = whiteBoard.P[i - 1];
@@ -59,7 +64,10 @@ namespace ChessTeamProject
                 Grid.SetRow(image, 6);
                 chessBoard[6, i] = 1;
                 image.MouseLeftButtonDown += PawnClicked;
+                image.Tag = "white";
                 MainGrid.Children.Add(image);
+
+                AnimatePiece(image);
             }
 
             for (int i = 1; i <= 8; i++) // Adding black pawns
@@ -70,9 +78,9 @@ namespace ChessTeamProject
                 Grid.SetRow(image, 1);
                 chessBoard[1, i] = 1;
                 image.MouseLeftButtonDown += PawnClicked;
+                image.Tag = "black";
                 MainGrid.Children.Add(image);
             }
-
 
             for (int i = 0; i < 2; i++) // Adding white bishops
             {
@@ -91,7 +99,10 @@ namespace ChessTeamProject
                 Grid.SetRow(image, 7);
                 chessBoard[7, col] = 1;
                 image.MouseLeftButtonDown += BishopClicked;
+                image.Tag = "white";
                 MainGrid.Children.Add(image);
+
+                AnimatePiece(image);
             }
 
             for (int i = 0; i < 2; i++) // Adding black bishops
@@ -111,7 +122,58 @@ namespace ChessTeamProject
                 Grid.SetRow(image, 0);
                 chessBoard[0, col] = 1;
                 image.MouseLeftButtonDown += BishopClicked;
+                image.Tag = "black";
                 MainGrid.Children.Add(image);
+            }
+
+            SetFiguresClickability("black", false);
+        }
+
+        private void AnimatePiece(Image piece)
+        {
+            var fadeInAnimation = new DoubleAnimation
+            {
+                From = 0, // Starting transparency value (0 - transparent)
+                To = 1, // Final transparency value (0 - visible)
+                Duration = TimeSpan.FromSeconds(1),
+                RepeatBehavior = new RepeatBehavior(4) // Repeat 3 times
+            };
+
+            piece.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation); // Changing the 'Opacity' property using the fadeInAnimation
+        }
+
+        private void GetSideAnimation(string side)
+        {
+            UIElementCollection figures = MainGrid.Children; // All Grid elements
+
+            foreach (var figure in figures)
+            {
+                if (figure is Image)
+                {
+                    var image = (Image)figure;
+                    if ((string)image.Tag == side) // Check if figure belongs to the specified side
+                    {
+                        AnimatePiece(image);
+                    }
+                }
+            }
+        }
+
+        private void SetFiguresClickability(string side, bool clickable)
+        {
+            UIElementCollection figures = MainGrid.Children; // All Grid elements
+
+            foreach (var figure in figures)
+            {
+                if (figure is Image)
+                {
+                    var image = (Image)figure;
+
+                    if ((string)image.Tag == side) // Check if figure belongs to the specified side
+                    {
+                        image.IsEnabled = clickable;
+                    }
+                }
             }
         }
 
@@ -145,6 +207,7 @@ namespace ChessTeamProject
                 Grid.SetColumn(stackPanel, 0);
                 MainGrid.Children.Add(stackPanel);
             }
+
             for (int col = 1; col < 9; col++)
             {
 
@@ -165,6 +228,7 @@ namespace ChessTeamProject
                 Grid.SetColumn(stackPanel1, col);
                 MainGrid.Children.Add(stackPanel1);
             }
+
             for (int str = 0; str < 8; str++)
                 for (int col = 1; col < 9; col++)
                 {
@@ -187,8 +251,6 @@ namespace ChessTeamProject
                     Grid.SetColumn(stackPanel2, col);
                     MainGrid.Children.Add(stackPanel2);
                 }
-
-
         }
 
         private void PawnClicked(object sender, MouseButtonEventArgs e)
@@ -203,7 +265,7 @@ namespace ChessTeamProject
             int currentRow = int.Parse(row.ToString());
             int currentCol = int.Parse(col.ToString());
 
-            if (clickedImage.Source.ToString().Contains("white"))
+            if ((string)clickedImage.Tag == "white")
             {
                 if (colIndex >= 0 && colIndex < whiteBoard.P.Count) // Check that index is in the allowed range
                 {
@@ -213,26 +275,11 @@ namespace ChessTeamProject
 
                     var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
 
-                    HighlightCells(possibleMoves);
-
-                    foreach (var cell in possibleMoves) // Adding an event handler for each selected cell
-                    {
-                        var panel = new WrapPanel
-                        {
-                            Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
-                            Opacity = 0.5
-                        };
-
-                        Grid.SetColumn(panel, (int)cell.X);
-                        Grid.SetRow(panel, (int)cell.Y);
-
-                        panel.MouseLeftButtonDown += CellClicked;
-
-                        MainGrid.Children.Add(panel);
-                    }
+                    HighlightCells(possibleMoves); 
                 }
             }
-            else if (clickedImage.Source.ToString().Contains("black"))
+
+            else if ((string)clickedImage.Tag == "black")
             {
                 if (colIndex >= 0 && colIndex < blackBoard.P.Count)
                 {
@@ -243,22 +290,6 @@ namespace ChessTeamProject
                     var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
 
                     HighlightCells(possibleMoves);
-
-                    foreach (var cell in possibleMoves)
-                    {
-                        var panel = new WrapPanel
-                        {
-                            Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
-                            Opacity = 0.5
-                        };
-
-                        Grid.SetColumn(panel, (int)cell.X);
-                        Grid.SetRow(panel, (int)cell.Y);
-
-                        panel.MouseLeftButtonDown += CellClicked;
-
-                        MainGrid.Children.Add(panel);
-                    }
                 }
             }
 
@@ -271,69 +302,30 @@ namespace ChessTeamProject
             var row = Grid.GetRow(clickedImage);
             var col = Grid.GetColumn(clickedImage);
 
-
-
             int currentRow = int.Parse(row.ToString());
             int currentCol = int.Parse(col.ToString());
 
-            if (clickedImage.Source.ToString().Contains("white"))
+            if ((string)clickedImage.Tag == "white")
             {
-
                 ResetCellHighlighting();
 
                 var possibleMoves = GetPossibleBishopMoves(currentRow, currentCol);
 
                 HighlightCells(possibleMoves);
-
-                foreach (var cell in possibleMoves) // Adding an event handler for each selected cell
-                {
-                    var panel = new WrapPanel
-                    {
-                        Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
-                        Opacity = 0.5
-                    };
-
-                    Grid.SetColumn(panel, (int)cell.X);
-                    Grid.SetRow(panel, (int)cell.Y);
-
-                    panel.MouseLeftButtonDown += CellClicked;
-
-                    MainGrid.Children.Add(panel);
-                }
             }
-            else if (clickedImage.Source.ToString().Contains("black"))
+            else if ((string)clickedImage.Tag == "black")
             {
-
-
                 ResetCellHighlighting();
 
                 var possibleMoves = GetPossibleBishopMoves(currentRow, currentCol);
 
                 HighlightCells(possibleMoves);
-
-                foreach (var cell in possibleMoves)
-                {
-                    var panel = new WrapPanel
-                    {
-                        Background = (Brush)new BrushConverter().ConvertFromString("Blue"),
-                        Opacity = 0.5
-                    };
-
-                    Grid.SetColumn(panel, (int)cell.X);
-                    Grid.SetRow(panel, (int)cell.Y);
-
-                    panel.MouseLeftButtonDown += CellClicked;
-
-                    MainGrid.Children.Add(panel);
-                }
             }
-
         }
 
         private List<Point> GetPossiblePawnMoves(IPawn pawn, int currentRow, int currentCol) // Point - coordinates (x, y)
         {
             //Element of the list - pair of (x, y) coordinates for a cell of possible move
-
             var possibleMoves = new List<Point>();
 
             if (pawn.Side == "White" && currentRow > 1)
@@ -355,6 +347,7 @@ namespace ChessTeamProject
                 }
 
             }
+
             else if (pawn.Side == "Black" && currentRow < 8)
             {
                 var oneCellAhead = new Point(currentCol, currentRow + 1);
@@ -380,12 +373,12 @@ namespace ChessTeamProject
         {
             var possibleMoves = new List<Point>();
 
-            if (clickedImage.Source.ToString().Contains("white") && currentRow >= 0)
+            if ((string)clickedImage.Tag == "white" && currentRow >= 0)
             {
                 CheckDiagonal(possibleMoves, currentRow, currentCol, chessBoard);
 
             }
-            else if (clickedImage.Source.ToString().Contains("black") && currentRow >= 0)
+            else if ((string)clickedImage.Tag == "black" && currentRow >= 0)
             {
                 CheckDiagonal(possibleMoves, currentRow, currentCol, chessBoard);
             }
@@ -395,13 +388,14 @@ namespace ChessTeamProject
 
         private void CheckDiagonal(List<Point> possibleMoves, int currentRow, int currentCol, int[,] chessBoard)
         {
-            for (int n = 1; n <= Math.Min(currentRow, currentCol - 1); n++) // LEFT UO
+            for (int n = 1; n <= Math.Min(currentRow, currentCol - 1); n++) // LEFT UP
             {
                 int newRow = currentRow - n;
                 int newCol = currentCol - n;
 
                 if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
+                    possibleMoves.Add(new Point(newCol, newRow));
                     break; // If the cell is occupied, stop moving diagonally
                 }
 
@@ -422,6 +416,7 @@ namespace ChessTeamProject
 
                 if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
+                    possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
 
@@ -440,6 +435,7 @@ namespace ChessTeamProject
 
                 if (IsCellOccupied(chessBoard, newRow, newCol))
                 {
+                    possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
 
@@ -458,6 +454,7 @@ namespace ChessTeamProject
 
                 if (IsCellOccupied(chessBoard, newRow, newCol))
                 {
+                    possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
 
@@ -470,18 +467,9 @@ namespace ChessTeamProject
             }
         }
 
-
         private bool IsCellOccupied(int[,] chessBoard, int col, int row)
         {
-
-            if (chessBoard[row, col] == 1)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return chessBoard[row, col] == 1;
         }
 
         private void CellClicked(object sender, MouseButtonEventArgs e)
@@ -501,6 +489,19 @@ namespace ChessTeamProject
             chessBoard[currentRow, currentCol] = 0;
 
             ResetCellHighlighting();
+
+            if (currentSide == "white")
+            {
+                currentSide = "black";
+                SetFiguresClickability("black", true); SetFiguresClickability("white", false);
+                GetSideAnimation("black");
+            }
+            else if (currentSide == "black")
+            {
+                currentSide = "white";
+                SetFiguresClickability("white", true); SetFiguresClickability("black", false);
+                GetSideAnimation("white");
+            }
         }
 
         private void HighlightCells(List<Point> cells)
@@ -516,6 +517,8 @@ namespace ChessTeamProject
                 Grid.SetColumn(panel, (int)cell.X);
                 Grid.SetRow(panel, (int)cell.Y);
 
+                panel.MouseLeftButtonDown += CellClicked; // Adding an event handler for each selected cell
+
                 MainGrid.Children.Add(panel);
             }
         }
@@ -523,6 +526,7 @@ namespace ChessTeamProject
         private void ResetCellHighlighting()
         {
             var panelsToRemove = MainGrid.Children.OfType<WrapPanel>().ToList();
+
             foreach (var panel in panelsToRemove)
             {
                 panel.MouseLeftButtonDown -= CellClicked;
