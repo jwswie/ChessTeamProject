@@ -32,9 +32,10 @@ namespace ChessTeamProject
         private static Board whiteBoard;
         private static Board blackBoard;
 
-        private static int[,] chessBoard = new int[9, 9]; // Array showing the position of figures on the board (0 - empty cell, 1 - figure)
+        private static int[,] chessBoard = new int[9, 9]; // Array showing the position of figures on the board (0 - empty cell, 1 - white, 2 - black)
 
         private static string currentSide;
+        private static bool flag;
 
         public MainWindow()
         {
@@ -67,7 +68,7 @@ namespace ChessTeamProject
                 image.Tag = "white";
                 MainGrid.Children.Add(image);
 
-                AnimatePiece(image);
+                Animation.AnimatePiece(image);
             }
 
             for (int i = 1; i <= 8; i++) // Adding black pawns
@@ -76,7 +77,7 @@ namespace ChessTeamProject
                 var image = pawn.Image;
                 Grid.SetColumn(image, i);
                 Grid.SetRow(image, 1);
-                chessBoard[1, i] = 1;
+                chessBoard[1, i] = 2;
                 image.MouseLeftButtonDown += PawnClicked;
                 image.Tag = "black";
                 MainGrid.Children.Add(image);
@@ -102,7 +103,7 @@ namespace ChessTeamProject
                 image.Tag = "white";
                 MainGrid.Children.Add(image);
 
-                AnimatePiece(image);
+                Animation.AnimatePiece(image);
             }
 
             for (int i = 0; i < 2; i++) // Adding black bishops
@@ -120,61 +121,13 @@ namespace ChessTeamProject
                 }
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 0);
-                chessBoard[0, col] = 1;
+                chessBoard[0, col] = 2;
                 image.MouseLeftButtonDown += BishopClicked;
                 image.Tag = "black";
                 MainGrid.Children.Add(image);
             }
 
-            SetFiguresClickability("black", false);
-        }
-
-        private void AnimatePiece(Image piece)
-        {
-            var fadeInAnimation = new DoubleAnimation
-            {
-                From = 0, // Starting transparency value (0 - transparent)
-                To = 1, // Final transparency value (0 - visible)
-                Duration = TimeSpan.FromSeconds(1),
-                RepeatBehavior = new RepeatBehavior(4) // Repeat 3 times
-            };
-
-            piece.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation); // Changing the 'Opacity' property using the fadeInAnimation
-        }
-
-        private void GetSideAnimation(string side)
-        {
-            UIElementCollection figures = MainGrid.Children; // All Grid elements
-
-            foreach (var figure in figures)
-            {
-                if (figure is Image)
-                {
-                    var image = (Image)figure;
-                    if ((string)image.Tag == side) // Check if figure belongs to the specified side
-                    {
-                        AnimatePiece(image);
-                    }
-                }
-            }
-        }
-
-        private void SetFiguresClickability(string side, bool clickable)
-        {
-            UIElementCollection figures = MainGrid.Children; // All Grid elements
-
-            foreach (var figure in figures)
-            {
-                if (figure is Image)
-                {
-                    var image = (Image)figure;
-
-                    if ((string)image.Tag == side) // Check if figure belongs to the specified side
-                    {
-                        image.IsEnabled = clickable;
-                    }
-                }
-            }
+            Animation.SetFiguresClickability("black", false, MainGrid);
         }
 
         private void GenerateChessBoard()
@@ -332,37 +285,74 @@ namespace ChessTeamProject
             {
                 var oneCellAhead = new Point(currentCol, currentRow - 1);
 
-                if (!IsCellOccupied(chessBoard, (int)oneCellAhead.X, (int)oneCellAhead.Y))
+                if (!IsCellOccupiedPawn(chessBoard, (int)oneCellAhead.Y, (int)oneCellAhead.X))
                 {
                     possibleMoves.Add(oneCellAhead); // One cell ahead
 
                     if (currentRow == 6) // If pawn has not moved yet
                     {
                         var twoCellsAhead = new Point(currentCol, currentRow - 2);
-                        if (!IsCellOccupied(chessBoard, (int)twoCellsAhead.X, (int)twoCellsAhead.Y))
+                        if (!IsCellOccupiedPawn(chessBoard, (int)twoCellsAhead.Y, (int)twoCellsAhead.X))
                         {
                             possibleMoves.Add(twoCellsAhead); // Two cells ahead
                         }
                     }
                 }
 
+                var leftDiagonal = new Point(currentCol - 1, currentRow - 1);
+                var rightDiagonal = new Point(currentCol + 1, currentRow - 1);
+
+                if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                {
+                    int newRow = (int)leftDiagonal.Y;
+                    int newCol = (int)leftDiagonal.X;
+
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+
+                if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                {
+                    int newRow = (int)rightDiagonal.Y;
+                    int newCol = (int)rightDiagonal.X;
+
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
             }
 
             else if (pawn.Side == "Black" && currentRow < 8)
             {
                 var oneCellAhead = new Point(currentCol, currentRow + 1);
-                if (!IsCellOccupied(chessBoard, (int)oneCellAhead.X, (int)oneCellAhead.Y))
+
+                if (!IsCellOccupiedPawn(chessBoard, (int)oneCellAhead.Y, (int)oneCellAhead.X))
                 {
                     possibleMoves.Add(oneCellAhead);
 
                     if (currentRow == 1)
                     {
                         var twoCellsAhead = new Point(currentCol, currentRow + 2);
-                        if (!IsCellOccupied(chessBoard, (int)twoCellsAhead.X, (int)twoCellsAhead.Y))
+                        if (!IsCellOccupiedPawn(chessBoard, (int)twoCellsAhead.Y, (int)twoCellsAhead.X))
                         {
                             possibleMoves.Add(twoCellsAhead);
                         }
                     }
+                }
+                var leftDiagonal = new Point(currentCol - 1, currentRow + 1);
+                var rightDiagonal = new Point(currentCol + 1, currentRow + 1);
+
+                if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                {
+                    int newRow = (int)leftDiagonal.Y;
+                    int newCol = (int)leftDiagonal.X;
+
+                    possibleMoves.Add(new Point(newCol, newRow));
+                }
+
+                if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                {
+                    int newRow = (int)rightDiagonal.Y;
+                    int newCol = (int)rightDiagonal.X;
+
+                    possibleMoves.Add(new Point(newCol, newRow));
                 }
             }
 
@@ -395,8 +385,14 @@ namespace ChessTeamProject
 
                 if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
-                    possibleMoves.Add(new Point(newCol, newRow));
                     break; // If the cell is occupied, stop moving diagonally
+                }
+
+                if (flag)
+                {
+                    flag = false;
+                    possibleMoves.Add(new Point(newCol, newRow));
+                    break;
                 }
 
                 possibleMoves.Add(new Point(newCol, newRow));
@@ -408,7 +404,6 @@ namespace ChessTeamProject
                 }
             }
 
-
             for (int n = 1; n <= Math.Min(currentRow, 8 - currentCol); n++) // RIGHT UP
             {
                 int newRow = currentRow - n;
@@ -416,6 +411,12 @@ namespace ChessTeamProject
 
                 if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
+                    break;
+                }
+
+                if (flag)
+                {
+                    flag = false;
                     possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
@@ -428,20 +429,26 @@ namespace ChessTeamProject
                 }
             }
 
-            for (int n = 1; n <= Math.Min(7 - currentRow, currentCol); n++) // LEFT DOWN
+            for (int n = 1; n <= Math.Min(7 - currentRow, currentCol - 1); n++) // LEFT DOWN
             {
                 int newRow = currentRow + n;
                 int newCol = currentCol - n;
 
-                if (IsCellOccupied(chessBoard, newRow, newCol))
+                if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
+                    break;
+                }
+
+                if (flag)
+                {
+                    flag = false;
                     possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
 
                 possibleMoves.Add(new Point(newCol, newRow));
 
-                if (n == Math.Min(8 - currentRow, currentCol) && !IsCellOccupied(chessBoard, newRow, newCol))
+                if (n == Math.Min(7 - currentRow, currentCol - 1) && !IsCellOccupied(chessBoard, newRow, newCol))
                 {
                     possibleMoves.Add(new Point(newCol, newRow));
                 }
@@ -452,8 +459,14 @@ namespace ChessTeamProject
                 int newRow = currentRow + n;
                 int newCol = currentCol + n;
 
-                if (IsCellOccupied(chessBoard, newRow, newCol))
+                if (IsCellOccupied(chessBoard, newCol, newRow))
                 {
+                    break;
+                }
+
+                if (flag)
+                {
+                    flag = false;
                     possibleMoves.Add(new Point(newCol, newRow));
                     break;
                 }
@@ -469,7 +482,49 @@ namespace ChessTeamProject
 
         private bool IsCellOccupied(int[,] chessBoard, int col, int row)
         {
-            return chessBoard[row, col] == 1;
+            if(currentSide == "white" && chessBoard[row, col] == 1) // White and White
+            {
+                flag = false;
+                return true;
+            }
+            if (currentSide == "white" && chessBoard[row, col] == 2) // White and Black
+            {
+                flag = true;
+                return false;
+            }
+            if (currentSide == "black" && chessBoard[row, col] == 1) // Black and White
+            {
+                flag = true;
+                return false;
+            }
+            if (currentSide == "black" && chessBoard[row, col] == 2) // Black and Black
+            {
+                flag = false;
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsThereEnemyFigure(int[,] chessBoard, int row, int col)
+        {
+            if (currentSide == "white" && chessBoard[row, col] == 2) // White and Black
+            {
+                return true;
+            }
+            if (currentSide == "black" && chessBoard[row, col] == 1) // Black and White
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsCellOccupiedPawn(int[,] chessBoard, int row, int col)
+        {
+            if (chessBoard[row, col] == 1 || chessBoard[row, col] == 2)
+            {
+                return true;
+            }
+            return false;
         }
 
         private void CellClicked(object sender, MouseButtonEventArgs e)
@@ -484,24 +539,61 @@ namespace ChessTeamProject
             int currentRow = int.Parse(row.ToString());
             int currentCol = int.Parse(col.ToString());
 
-            FigureMove.PerformPawnMove(clickedImage, newRow, newCol, chessBoard);
+            if (currentSide == "white")
+            {
+                if(chessBoard[newRow, newCol] == 2)
+                {
+                    UIElement elementToRemove = null;
+
+                    foreach (UIElement element in MainGrid.Children)
+                    {
+                        if (element is Image && Grid.GetRow(element) == newRow && Grid.GetColumn(element) == newCol)
+                        {
+                            elementToRemove = element;
+                            break;
+                        }
+                    }
+
+                    if (elementToRemove != null)
+                    {
+                        MainGrid.Children.Remove(elementToRemove);
+                    }
+                }
+                currentSide = "black";
+                Animation.SetFiguresClickability("black", true, MainGrid); Animation.SetFiguresClickability("white", false, MainGrid);
+                Animation.GetSideAnimation("black", MainGrid);
+            }
+            else if (currentSide == "black")
+            {
+                if (chessBoard[newRow, newCol] == 1)
+                {
+                    UIElement elementToRemove = null;
+
+                    foreach (UIElement element in MainGrid.Children)
+                    {
+                        if (element is Image && Grid.GetRow(element) == newRow && Grid.GetColumn(element) == newCol)
+                        {
+                            elementToRemove = element;
+                            break;
+                        }
+                    }
+
+                    if (elementToRemove != null)
+                    {
+                        MainGrid.Children.Remove(elementToRemove);
+                    }
+                }
+
+                currentSide = "white";
+                Animation.SetFiguresClickability("white", true, MainGrid); Animation.SetFiguresClickability("black", false, MainGrid);
+                Animation.GetSideAnimation("white", MainGrid);
+            }
+
+            FigureMove.PerformPawnMove(clickedImage, newRow, newCol, chessBoard, currentSide);
 
             chessBoard[currentRow, currentCol] = 0;
 
             ResetCellHighlighting();
-
-            if (currentSide == "white")
-            {
-                currentSide = "black";
-                SetFiguresClickability("black", true); SetFiguresClickability("white", false);
-                GetSideAnimation("black");
-            }
-            else if (currentSide == "black")
-            {
-                currentSide = "white";
-                SetFiguresClickability("white", true); SetFiguresClickability("black", false);
-                GetSideAnimation("white");
-            }
         }
 
         private void HighlightCells(List<Point> cells)
