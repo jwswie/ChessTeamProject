@@ -1,6 +1,7 @@
 ﻿using ChessTeamProject;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,9 @@ namespace WpfApp17
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool f = true;
+        private int CurrentMove = 1;
+        int NumberOfGame = 1;
         private IPawn selectedPawn;
         private Image clickedImage;
 
@@ -31,7 +35,10 @@ namespace WpfApp17
         private static Board blackBoard;
 
         private static int[,] chessBoard = new int[9, 9];
-
+        private static int[] NumbersOnBoard = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        private static string[] LettersOnBoard = { "a", "b", "c", "d", "e", "f", "g", "h" };
+        private static string[] AllImages = { new WhitePawn().Image.Name, new BlackPawn().Image.Name, new WhiteKnight().Image.Name, new BlackKnight().Image.Name, new WhiteBishop().Image.Name, new BlackBishop().Image.Name, new WhiteRook().Image.Name, new BlackRook().Image.Name, new WhiteQueen().Image.Name, new BlackQueen().Image.Name, new WhiteKing().Image.Name, new BlackKing().Image.Name };
+        private static string[] Allsymbols = { new WhitePawn().Symbol, new BlackPawn().Symbol, new WhiteKnight().Symbol, new BlackKnight().Symbol, new WhiteBishop().Symbol, new BlackBishop().Symbol, new WhiteRook().Symbol, new BlackRook().Symbol, new WhiteQueen().Symbol, new BlackQueen().Symbol, new WhiteKing().Symbol, new BlackKing().Symbol };
         public MainWindow()
         {
             InitializeComponent();
@@ -117,15 +124,14 @@ namespace WpfApp17
             {
                 var knight = whiteBoard.Kn[i];
                 var image = knight.Image;
-                int col;
-                if (i == 0)
+                int col = 0;
+                switch (i)
                 {
-                    col = 2;
-                }
-                else
-                {
-                    col = 7;
-                }
+                    case 0:
+                        { col = 2; break; }
+                    case 1:
+                        { col = 7; break; }
+                };
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 7);
                 chessBoard[7, col] = 1;
@@ -137,21 +143,21 @@ namespace WpfApp17
             {
                 var knight = blackBoard.Kn[i];
                 var image = knight.Image;
-                int col;
-                if (i == 0)
+                int col = 0;
+                switch (i)
                 {
-                    col = 2;
-                }
-                else
-                {
-                    col = 7;
-                }
+                    case 0:
+                        { col = 2; break; }
+                    case 1:
+                        { col = 7; break; }
+                };
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 0);
                 chessBoard[0, col] = 1;
                 image.MouseLeftButtonDown += KnightClicked;
                 MainGrid.Children.Add(image);
             }
+
             for (int i = 0; i < 1; i++) // Adding white queen
             {
                 var king = whiteBoard.Q[i];
@@ -159,6 +165,7 @@ namespace WpfApp17
                 int col = 4;
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 7);
+                chessBoard[7, col] = 1;
                 image.MouseLeftButtonDown += QueenClicked;
                 MainGrid.Children.Add(image);
             }
@@ -170,6 +177,7 @@ namespace WpfApp17
                 int col = 4;
                 Grid.SetColumn(image, col);
                 Grid.SetRow(image, 0);
+                chessBoard[0, col] = 1;
                 image.MouseLeftButtonDown += QueenClicked;
                 MainGrid.Children.Add(image);
             }
@@ -528,10 +536,9 @@ namespace WpfApp17
         {
             var possibleMoves = new List<Point>();
 
-            if (currentRow >= 0)
+            if (currentRow >= 0 && currentCol>=1)
             {
                 CheckKnightMoves(possibleMoves, currentRow, currentCol, chessBoard);
-
             }
 
             return possibleMoves;
@@ -554,7 +561,7 @@ namespace WpfApp17
             //lower-right
             for (int n = 2, m = 1; n>0; n--, m++)
             {
-                if (8 >= currentRow + n && 8 >= currentCol + m)
+                if (7 >= currentRow + n && 8 >= currentCol + m)
                 {
                     int newRow = currentRow + n;
                     int newCol = currentCol + m;
@@ -569,7 +576,7 @@ namespace WpfApp17
             //upper-left
             for (int n = -2, m = -1; n<0; n++, m--)
             {
-                if (0 <= currentRow + n && 0 <= currentCol + m)
+                if (0 <= currentRow + n && 1 <= currentCol + m)
                 {
                     int newRow = currentRow + n;
                     int newCol = currentCol + m;
@@ -599,7 +606,7 @@ namespace WpfApp17
             //lower-left
             for (int n = 1, m = -2; m<0; n++, m++)
             {
-                if (8 >= currentRow + n && 0 <= currentCol + m)
+                if (7 >= currentRow + n && 1 <= currentCol + m)
                 {
                     int newRow = currentRow + n;
                     int newCol = currentCol + m;
@@ -767,7 +774,14 @@ namespace WpfApp17
             int currentCol = int.Parse(col.ToString());
 
             FigureMove.PerformPawnMove(clickedImage, newRow, newCol, chessBoard);
-
+            for (int i = 0; i < AllImages.Length; i++)
+                if (clickedImage.Name == AllImages[i])
+                {
+                    if (clickedImage.Name.Contains("White"))
+                        SavingInformation(newCol, newRow, Allsymbols[i], "White");
+                    else
+                        SavingInformation(newCol, newRow, Allsymbols[i], "Black");
+                }
             chessBoard[currentRow, currentCol] = 0;
 
             ResetCellHighlighting();
@@ -797,6 +811,33 @@ namespace WpfApp17
             {
                 panel.MouseLeftButtonDown -= CellClicked;
                 MainGrid.Children.Remove(panel);
+            }
+        }
+
+        private async Task SavingInformation(int col, int row, string symbol, string ColorSide)
+        {
+
+            while (f)
+            {
+                if (!File.Exists($"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\ChessGame{NumberOfGame}.txt"))
+                {
+                    FileStream fileStream = new FileStream($"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\ChessGame{NumberOfGame}.txt", FileMode.Create);
+                    fileStream.Close();
+                    f = false;
+                    break;
+                }
+                else
+                    NumberOfGame+=1;
+            }
+            using (StreamWriter fstream = new StreamWriter($"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\ChessGame{NumberOfGame}.txt", true))
+            {
+                if (ColorSide=="White")
+                {
+                    fstream.Write($"{CurrentMove}.{symbol}{LettersOnBoard[col]}{NumbersOnBoard[row]}");
+                    CurrentMove += 1;
+                }
+                else
+                    fstream.Write($"\t{symbol}{LettersOnBoard[col]}{NumbersOnBoard[row]}\n");
             }
         }
     }
