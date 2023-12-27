@@ -228,7 +228,7 @@ namespace ChessTeamProject
 
                     var possibleMoves = GetPossiblePawnMoves(selectedPawn, currentRow, currentCol);
 
-                    HighlightCells(possibleMoves); 
+                    HighlightCells(possibleMoves);
                 }
             }
 
@@ -281,7 +281,7 @@ namespace ChessTeamProject
             //Element of the list - pair of (x, y) coordinates for a cell of possible move
             var possibleMoves = new List<Point>();
 
-            if (pawn.Side == "White" && currentRow > 1)
+            if (pawn.Side == "White")
             {
                 var oneCellAhead = new Point(currentCol, currentRow - 1);
 
@@ -298,24 +298,29 @@ namespace ChessTeamProject
                         }
                     }
                 }
-
-                var leftDiagonal = new Point(currentCol - 1, currentRow - 1);
-                var rightDiagonal = new Point(currentCol + 1, currentRow - 1);
-
-                if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                if (currentCol - 1 > 0 && currentRow - 1 >= 0)
                 {
-                    int newRow = (int)leftDiagonal.Y;
-                    int newCol = (int)leftDiagonal.X;
+                    var leftDiagonal = new Point(currentCol - 1, currentRow - 1);
 
-                    possibleMoves.Add(new Point(newCol, newRow));
+                    if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                    {
+                        int newRow = (int)leftDiagonal.Y;
+                        int newCol = (int)leftDiagonal.X;
+
+                        possibleMoves.Add(new Point(newCol, newRow));
+                    }
                 }
-
-                if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                if (currentCol + 1 < 9 && currentRow - 1 >= 0)
                 {
-                    int newRow = (int)rightDiagonal.Y;
-                    int newCol = (int)rightDiagonal.X;
+                    var rightDiagonal = new Point(currentCol + 1, currentRow - 1);
 
-                    possibleMoves.Add(new Point(newCol, newRow));
+                    if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                    {
+                        int newRow = (int)rightDiagonal.Y;
+                        int newCol = (int)rightDiagonal.X;
+
+                        possibleMoves.Add(new Point(newCol, newRow));
+                    }
                 }
             }
 
@@ -336,23 +341,30 @@ namespace ChessTeamProject
                         }
                     }
                 }
-                var leftDiagonal = new Point(currentCol - 1, currentRow + 1);
-                var rightDiagonal = new Point(currentCol + 1, currentRow + 1);
 
-                if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                if (currentCol - 1 > 0 && currentRow + 1 < 9)
                 {
-                    int newRow = (int)leftDiagonal.Y;
-                    int newCol = (int)leftDiagonal.X;
+                    var leftDiagonal = new Point(currentCol - 1, currentRow + 1);
 
-                    possibleMoves.Add(new Point(newCol, newRow));
+                    if (IsThereEnemyFigure(chessBoard, (int)leftDiagonal.Y, (int)leftDiagonal.X))
+                    {
+                        int newRow = (int)leftDiagonal.Y;
+                        int newCol = (int)leftDiagonal.X;
+
+                        possibleMoves.Add(new Point(newCol, newRow));
+                    }
                 }
-
-                if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                if (currentCol + 1 < 9 && currentRow + 1 < 9)
                 {
-                    int newRow = (int)rightDiagonal.Y;
-                    int newCol = (int)rightDiagonal.X;
+                    var rightDiagonal = new Point(currentCol + 1, currentRow + 1);
 
-                    possibleMoves.Add(new Point(newCol, newRow));
+                    if (IsThereEnemyFigure(chessBoard, (int)rightDiagonal.Y, (int)rightDiagonal.X))
+                    {
+                        int newRow = (int)rightDiagonal.Y;
+                        int newCol = (int)rightDiagonal.X;
+
+                        possibleMoves.Add(new Point(newCol, newRow));
+                    }
                 }
             }
 
@@ -482,7 +494,7 @@ namespace ChessTeamProject
 
         private bool IsCellOccupied(int[,] chessBoard, int col, int row)
         {
-            if(currentSide == "white" && chessBoard[row, col] == 1) // White and White
+            if (currentSide == "white" && chessBoard[row, col] == 1) // White and White
             {
                 flag = false;
                 return true;
@@ -541,7 +553,7 @@ namespace ChessTeamProject
 
             if (currentSide == "white")
             {
-                if(chessBoard[newRow, newCol] == 2)
+                if (chessBoard[newRow, newCol] == 2)
                 {
                     UIElement elementToRemove = null;
 
@@ -557,6 +569,7 @@ namespace ChessTeamProject
                     if (elementToRemove != null)
                     {
                         MainGrid.Children.Remove(elementToRemove);
+                        chessBoard[newRow, newCol] = 0;
                     }
                 }
                 currentSide = "black";
@@ -581,6 +594,7 @@ namespace ChessTeamProject
                     if (elementToRemove != null)
                     {
                         MainGrid.Children.Remove(elementToRemove);
+                        chessBoard[newRow, newCol] = 0;
                     }
                 }
 
