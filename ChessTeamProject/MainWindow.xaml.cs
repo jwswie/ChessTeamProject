@@ -40,6 +40,10 @@ namespace ChessTeamProject
         public MainWindow()
         {
             InitializeComponent();
+
+            LogInWindow log = new LogInWindow();
+            log.ShowDialog();
+
             GenerateChessBoard();
 
             for (int row = 0; row < 8; row++)

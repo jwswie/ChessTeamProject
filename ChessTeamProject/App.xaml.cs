@@ -13,5 +13,6 @@ namespace ChessTeamProject
     /// </summary>
     public partial class App : Application
     {
+
     }
 }
