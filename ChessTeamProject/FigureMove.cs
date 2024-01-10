@@ -11,9 +11,9 @@ namespace ChessTeamProject
     public class FigureMove
     {
 
-        public static void PerformPawnMove(Image pawn, int newRow, int newCol, int[,] chessBoard)
+        public static void PerformPawnMove(Image pawn, int newRow, int newCol, int[,] chessBoard, string currentSide)
         {
-            if (pawn != null && newRow >= 0 && newRow <= 8 && newCol >= 0 && newCol <= 8)
+            if (pawn != null && newRow >= 0 && newRow < 8 && newCol >= 0 && newCol <= 8)
             {
                 var grid = pawn.Parent as Grid;
 
@@ -21,7 +21,16 @@ namespace ChessTeamProject
                 {
                     Grid.SetRow(pawn, newRow);
                     Grid.SetColumn(pawn, newCol);
-                    chessBoard[newRow, newCol] = 1;
+
+                    if (currentSide == "white")
+                    {
+                        chessBoard[newRow, newCol] = 2;
+                    }
+                    else if (currentSide == "black")
+                    {
+                        chessBoard[newRow, newCol] = 1;
+                    }
+
                 }
             }
         }
